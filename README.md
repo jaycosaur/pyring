@@ -2,9 +2,11 @@
 
 A pure python implementation of a non-blocking ring buffer with optional factory for alternate memory allocation.
 
-You may not call it a ring buffer, they also go by other names like circular buffer, circular queue or cyclic buffer.
+<p align="center">
+  <img width="200" height="200" src="https://github.com/jaycosaur/pyring/blob/master/img/pyring.png">
+</p>
 
-![A ring buffer snake](https://github.com/jaycosaur/pyring/blob/master/img/pyring.png)
+You may not call it a ring buffer, they also go by other names like circular buffer, circular queue or cyclic buffer.
 
 ## Installation
 
