@@ -2,6 +2,8 @@
 
 A pure python implementation of a non-blocking ring buffer with optional factory for alternate memory allocation.
 
+You may not call it a ring buffer, they also go by other names like circular buffer, circular queue or cyclic buffer.
+
 ## Installation
 
 `python3 -m pip install pyring`

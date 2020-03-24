@@ -8,4 +8,4 @@ from .ring_factory import RingFactory, SimpleFactory
 from .ring_buffer import RingBuffer
 from .exceptions import SequenceNotFound, Empty, SequenceOverwritten
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
