@@ -4,6 +4,8 @@ A pure python implementation of a non-blocking ring buffer with optional factory
 
 You may not call it a ring buffer, they also go by other names like circular buffer, circular queue or cyclic buffer.
 
+![A ring buffer snake](https://github.com/jaycosaur/pyring/blob/master/img/pyring.png)
+
 ## Installation
 
 `python3 -m pip install pyring`
@@ -62,3 +64,11 @@ print(sequence, value) # 0 15
 ## Examples of Usage
 
 COMING SOON
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
