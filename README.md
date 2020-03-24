@@ -25,7 +25,7 @@ Included are several variations of a ring buffer:
 3. `BlockingRingBuffer` - Extension of `RingBuffer` with a read method `next()` which increments a read cursor and the writer cannot advance past the read cursor
 4. `BlockingLockedRingBuffer` - The same as `BlockingRingBuffer` but secured by a lock (handy for multithread / multiproc)
 
-Basic usage with default size and factory
+### Basic usage with default size and factory
 
 ```python
 import pyring
@@ -41,7 +41,7 @@ sequence, value = ring_buffer.get_latest()
 print(sequence, value) # 0 Something new!
 ```
 
-Custom size
+### Custom ring size
 
 ```python
 import pyring
@@ -49,7 +49,7 @@ import pyring
 ring_buffer = pyring.RingBuffer(size=128) # size must be a power of 2
 ```
 
-Custom factory
+### Custom factory
 
 ```python
 import pyring
