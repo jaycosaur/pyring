@@ -5,7 +5,12 @@
 name = "pyring"
 
 from .ring_factory import RingFactory, SimpleFactory
-from .ring_buffer import RingBuffer
-from .exceptions import SequenceNotFound, Empty, SequenceOverwritten
+from .ring_buffer import (
+    RingBuffer,
+    BlockingRingBuffer,
+    LockedRingBuffer,
+    BlockingLockedRingBuffer,
+)
+from .exceptions import SequenceNotFound, Empty, SequenceOverwritten, ReadCursorBlock
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"

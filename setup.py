@@ -2,7 +2,7 @@ import setuptools  # type: ignore
 
 setuptools.setup(
     name="pyring",
-    version="0.0.2",
+    version="0.0.3",
     author="Jacob Richter",
     author_email="jaycorichter@gmail.com",
     description="A ring buffer implemented in pure python.",

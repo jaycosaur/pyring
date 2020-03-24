@@ -8,3 +8,7 @@ class SequenceNotFound(Exception):
 
 class Empty(Exception):
     pass
+
+
+class ReadCursorBlock(Exception):
+    pass
