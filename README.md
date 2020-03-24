@@ -1,6 +1,9 @@
 # PyRing
 
-![](https://github.com/jaycosaur/pyring/workflows/Build%20and%20Test/badge.svg)
+<p align="left">
+  <img src="https://github.com/jaycosaur/pyring/workflows/Build%20and%20Test/badge.svg">
+</p>
+
 A pure python implementation of a non-blocking ring buffer with optional factory for alternate memory allocation.
 
 <p align="center">
