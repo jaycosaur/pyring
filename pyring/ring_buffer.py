@@ -1,5 +1,5 @@
 import typing
-from threading import Lock
+from threading import Lock, Event
 from multiprocessing import Value
 from abc import abstractmethod, ABC
 from .ring_factory import RingFactory, SimpleFactory
@@ -206,3 +206,49 @@ class BlockingLockedRingBuffer(BlockingRingBuffer, SequencedRingBufferMethods):
     def flush(self):
         with self.__lock:
             return super().flush()
+
+
+class WaitingBlockingRingBuffer(RingBufferInternal, SequencedRingBufferMethods):
+    _read_cursor = 0
+    _read_cursor_barrier = Event()
+    _write_cursor_barrier = Event()
+
+    def __init__(
+        self,
+        size: int = 16,
+        factory: typing.Type[RingFactory] = SimpleFactory,
+        cursor_position_value: typing.Union[Value, int] = 0,
+    ):
+        super().__init__(
+            size=size, factory=factory, cursor_position_value=cursor_position_value
+        )
+
+    def put(self, value, timeout: int = None):
+        if not self._read_cursor_barrier.is_set():
+            self._read_cursor_barrier.set()
+        if (self._get_cursor_position() - self._read_cursor) == self.ring_size:
+            self._write_cursor_barrier.clear()
+            success = self._write_cursor_barrier.wait(timeout=timeout)
+            if not success:
+                raise ReadCursorBlock()
+        return super()._put(value)
+
+    def next(self, timeout: int = None):
+        try:
+            res = super()._get(self._read_cursor)
+        except SequenceNotFound:
+            self._read_cursor_barrier.clear()
+            success = self._read_cursor_barrier.wait(timeout=timeout)
+            if not success:
+                raise SequenceNotFound()
+
+        res = super()._get(self._read_cursor)
+        # release the write barrier
+        if not self._write_cursor_barrier.is_set():
+            self._write_cursor_barrier.set()
+        self._read_cursor += 1
+        return res
+
+    def flush(self):
+        super()._flush()
+        self._read_cursor = 0

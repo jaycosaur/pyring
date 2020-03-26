@@ -24,6 +24,7 @@ Included are several variations of a ring buffer:
 2. `LockedRingBuffer` - The same as `RingBuffer` but secured by a lock (handy for multithread / multiproc)
 3. `BlockingRingBuffer` - Extension of `RingBuffer` with a read method `next()` which increments a read cursor and the writer cannot advance past the read cursor
 4. `BlockingLockedRingBuffer` - The same as `BlockingRingBuffer` but secured by a lock (handy for multithread / multiproc)
+5. `WaitingBlockingRingBuffer` - The same as `BlockingRingBuffer` but calls to next and put block and wait (with optional timeout arg)
 
 ### Basic usage with default size and factory
 

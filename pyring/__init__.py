@@ -10,6 +10,7 @@ from .ring_buffer import (
     BlockingRingBuffer,
     LockedRingBuffer,
     BlockingLockedRingBuffer,
+    WaitingBlockingRingBuffer,
 )
 from .exceptions import SequenceNotFound, Empty, SequenceOverwritten, ReadCursorBlock
 
