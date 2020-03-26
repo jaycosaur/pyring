@@ -74,6 +74,56 @@ sequence, value = ring_buffer.get_latest()
 print(sequence, value) # 0 15
 ```
 
+### Multiprocess C-Types Example
+
+The below is a demonstration of using a RingBuffer across multiple processes, this requires firstly a LockedRingBuffer (with a multiproc lock), in addition to a custom cursor_position_value to increment sequence counts across processes.
+
+This is more a demonstration on how flexible this ring buffer implementation can be rather than where you should use it, the below approach would most likely (with caveats on datasize) be better handled with threads reading off the ring buffer and passing messages via queues to worker processes.
+
+```python
+import multiprocessing as mp
+import time
+from pyring import LockedRingBuffer, RingFactory
+
+# using r lock due to the reuse for the cursor_position_value
+mp_lock = mp.RLock()
+
+# note if using the same lock it must be recursive lock otherwise you will get deadlocks
+cursor_position_value = mp.Value("i", 0, lock=mp_lock)
+
+# using multiproc compatible c-types.
+class MultiprocFactory(RingFactory):
+    def __init__(self):
+        self.value = mp.Value("i")
+
+    def set(self, v: int):
+        self.value.value = v
+
+    def get(self):
+        return self.value.value
+
+
+ring_buffer = LockedRingBuffer(
+    factory=MultiprocFactory, lock=mp_lock, cursor_position_value=cursor_position_value
+)
+
+
+def worker_routine(worker_ring_buffer: LockedRingBuffer):
+    for i in range(10):
+        worker_ring_buffer.put(i)
+
+
+proc = mp.Process(target=worker_routine, args=(ring_buffer,))
+proc.start()
+time.sleep(0.01)
+
+for i in range(10):
+    sequence, value = ring_buffer.get(i)
+    print(sequence, value)
+
+proc.join()
+```
+
 ## Examples of Usage
 
 COMING SOON

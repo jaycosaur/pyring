@@ -1,5 +1,6 @@
 import typing
 from threading import Lock
+from multiprocessing import Value
 from abc import abstractmethod, ABC
 from .ring_factory import RingFactory, SimpleFactory
 from .exceptions import SequenceNotFound, Empty, SequenceOverwritten, ReadCursorBlock
@@ -7,7 +8,10 @@ from .exceptions import SequenceNotFound, Empty, SequenceOverwritten, ReadCursor
 
 class RingBufferInternal:
     def __init__(
-        self, size: int = 16, factory: typing.Type[RingFactory] = SimpleFactory,
+        self,
+        size: int = 16,
+        factory: typing.Type[RingFactory] = SimpleFactory,
+        cursor_position_value: typing.Union[Value, int] = 0,
     ):
         if not size % 2 == 0:
             raise AttributeError("size must be a factor of 2 for efficient arithmetic.")
@@ -15,39 +19,53 @@ class RingBufferInternal:
         self.ring_size: int = size
         self.factory = factory
 
-        self._cursor_position: int = 0  # position of next write
+        self.__cursor_position = cursor_position_value  # position of next write
         self.__ring: typing.List[RingFactory] = [factory() for _ in range(size)]
 
-    def _put(self, value) -> int:
-        cursor_position = self._cursor_position
-        ring_index = self._cursor_position % self.ring_size
+    def _get_cursor_position(self):
+        if isinstance(self.__cursor_position, int):
+            return self.__cursor_position
+        else:
+            return self.__cursor_position.value
 
-        self._cursor_position += 1
+    def _set_cursor_position(self, value: int):
+        if isinstance(self.__cursor_position, int):
+            self.__cursor_position = value
+        else:
+            self.__cursor_position.value = value
+
+    def _put(self, value) -> int:
+        cursor_position = self._get_cursor_position()
+        ring_index = cursor_position % self.ring_size
+
+        self._set_cursor_position(cursor_position + 1)
 
         self.__ring[ring_index].set(value)
 
         return cursor_position
 
     def _get(self, idx: int) -> typing.Tuple[int, typing.Any]:
-        if idx >= self._cursor_position:
+        cursor_position = self._get_cursor_position()
+        if idx >= cursor_position:
             raise SequenceNotFound()
 
-        if idx < self._cursor_position - self.ring_size:
+        if idx < cursor_position - self.ring_size:
             raise SequenceOverwritten()
 
         return (idx, self.__ring[idx % self.ring_size].get())
 
     def _get_latest(self) -> typing.Tuple[int, typing.Any]:
-        if self._cursor_position <= 0:
+        cursor_position = self._get_cursor_position()
+        if cursor_position <= 0:
             raise Empty()
 
-        idx = self._cursor_position - 1
+        idx = cursor_position - 1
 
         return self._get(idx)
 
     def _flush(self) -> None:
         self.__ring = [self.factory() for _ in range(self.ring_size)]
-        self._cursor_position = 0
+        self._set_cursor_position(0)
 
 
 class RandomAccessRingBufferMethods(ABC):
@@ -84,9 +102,14 @@ class SequencedRingBufferMethods(ABC):
 
 class RingBuffer(RingBufferInternal, RandomAccessRingBufferMethods):
     def __init__(
-        self, size: int = 16, factory: typing.Type[RingFactory] = SimpleFactory,
+        self,
+        size: int = 16,
+        factory: typing.Type[RingFactory] = SimpleFactory,
+        cursor_position_value: typing.Union[Value, int] = 0,
     ):
-        super().__init__(size=size, factory=factory)
+        super().__init__(
+            size=size, factory=factory, cursor_position_value=cursor_position_value
+        )
 
     def put(self, value):
         return super()._put(value)
@@ -107,8 +130,11 @@ class LockedRingBuffer(RingBuffer, RandomAccessRingBufferMethods):
         size: int = 16,
         factory: typing.Type[RingFactory] = SimpleFactory,
         lock: Lock = Lock(),
+        cursor_position_value: typing.Union[Value, int] = 0,
     ):
-        super().__init__(size=size, factory=factory)
+        super().__init__(
+            size=size, factory=factory, cursor_position_value=cursor_position_value
+        )
         self.__lock = lock
 
     def put(self, value) -> int:
@@ -132,12 +158,17 @@ class BlockingRingBuffer(RingBufferInternal, SequencedRingBufferMethods):
     _read_cursor = 0
 
     def __init__(
-        self, size: int = 16, factory: typing.Type[RingFactory] = SimpleFactory,
+        self,
+        size: int = 16,
+        factory: typing.Type[RingFactory] = SimpleFactory,
+        cursor_position_value: typing.Union[Value, int] = 0,
     ):
-        super().__init__(size=size, factory=factory)
+        super().__init__(
+            size=size, factory=factory, cursor_position_value=cursor_position_value
+        )
 
     def put(self, value):
-        if (self._cursor_position - self._read_cursor) == self.ring_size:
+        if (self._get_cursor_position() - self._read_cursor) == self.ring_size:
             raise ReadCursorBlock()
         return super()._put(value)
 
@@ -157,8 +188,11 @@ class BlockingLockedRingBuffer(BlockingRingBuffer, SequencedRingBufferMethods):
         size: int = 16,
         factory: typing.Type[RingFactory] = SimpleFactory,
         lock: Lock = Lock(),
+        cursor_position_value: typing.Union[Value, int] = 0,
     ):
-        super().__init__(size=size, factory=factory)
+        super().__init__(
+            size=size, factory=factory, cursor_position_value=cursor_position_value
+        )
         self.__lock = lock
 
     def put(self, value):
