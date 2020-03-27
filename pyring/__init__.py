@@ -14,4 +14,4 @@ from .ring_buffer import (
 )
 from .exceptions import SequenceNotFound, Empty, SequenceOverwritten, ReadCursorBlock
 
-__version__ = "0.0.5"
+__version__ = "0.0.6"
