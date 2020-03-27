@@ -20,7 +20,7 @@ You may not call it a ring buffer, they also go by other names like circular buf
 
 Included are several variations of a ring buffer:
 
-1. `RingBuffer` - The most basic, non-blocking non-locked ring.
+1. `RingBuffer` - The most basic, non-blocking ring, supports optional RLocks as constructor argument.
 2. `LockedRingBuffer` - The same as `RingBuffer` but secured by a lock (handy for multithread / multiproc)
 3. `BlockingRingBuffer` - Extension of `RingBuffer` with a read method `next()` which increments a read cursor and the writer cannot advance past the read cursor
 4. `BlockingLockedRingBuffer` - The same as `BlockingRingBuffer` but secured by a lock (handy for multithread / multiproc)
