@@ -36,7 +36,7 @@ class DisruptorSubscriber:
 
         # release the write barrier
         if not self._write_cursor_barrier.is_set():
-            self.__ring_buffer._write_cursor_barrier.set()
+            self._write_cursor_barrier.set()
 
         self._read_cursor += 1
         return res
@@ -44,14 +44,11 @@ class DisruptorSubscriber:
     def unregister(self) -> None:
         self.__ring_buffer._unregister_subscriber(self)
         if not self._write_cursor_barrier.is_set():
-            self.__ring_buffer._write_cursor_barrier.set()
+            self._write_cursor_barrier.set()
 
 
 # this really needs locks
 class SingleProducerDisruptor(RingBufferInternal, DisruptorMethods):
-    _subscribers: typing.List[DisruptorSubscriber] = []
-    _write_cursor_barrier = Event()
-
     def __init__(
         self,
         size: int = 16,
@@ -61,6 +58,7 @@ class SingleProducerDisruptor(RingBufferInternal, DisruptorMethods):
         super().__init__(
             size=size, factory=factory, cursor_position_value=cursor_position_value
         )
+        self._subscribers: typing.List[DisruptorSubscriber] = []
 
     def subscribe(self, start_at_latest: bool = False) -> DisruptorSubscriber:
         if start_at_latest:
@@ -85,7 +83,7 @@ class SingleProducerDisruptor(RingBufferInternal, DisruptorMethods):
             if (
                 self._get_cursor_position() - subscriber._read_cursor
             ) == self.ring_size:
-                self._write_cursor_barrier.clear()
+                subscriber._write_cursor_barrier.clear()
                 success = subscriber._write_cursor_barrier.wait(timeout=timeout)
                 if not success:
                     raise ReadCursorBlock()
