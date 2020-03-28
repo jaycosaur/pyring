@@ -20,11 +20,12 @@ You may not call it a ring buffer, they also go by other names like circular buf
 
 Included are several variations of a ring buffer:
 
-1. `RingBuffer` - The most basic, non-blocking ring, supports optional RLocks as constructor argument.
-2. `LockedRingBuffer` - The same as `RingBuffer` but secured by a lock (handy for multithread / multiproc)
-3. `BlockingRingBuffer` - Extension of `RingBuffer` with a read method `next()` which increments a read cursor and the writer cannot advance past the read cursor
-4. `BlockingLockedRingBuffer` - The same as `BlockingRingBuffer` but secured by a lock (handy for multithread / multiproc)
-5. `WaitingBlockingRingBuffer` - The same as `BlockingRingBuffer` but calls to next and put block and wait (with optional timeout arg)
+1. **RingBuffer** - The most basic, non-blocking ring, supports optional RLocks as constructor argument.
+2. **LockedRingBuffer** - The same as `RingBuffer` but secured by a lock (handy for multithread / multiproc)
+3. **BlockingRingBuffer** - Extension of `RingBuffer` with a read method `next()` which increments a read cursor and the writer cannot advance past the read cursor
+4. **BlockingLockedRingBuffer** - The same as `BlockingRingBuffer` but secured by a lock (handy for multithread / multiproc)
+5. **WaitingBlockingRingBuffer** - The same as `BlockingRingBuffer` but calls to next and put block and wait (with optional timeout arg)
+6. **SingleProducerDisruptor** - The same as `WaitingBlockingRingBuffer` but allows multiple subscribers to a single ring buffer by calling `subscribe()` which returns a `DisruptorSubscriber` object. No next method on disruptor, instead it is on the `DisruptorSubscriber` objects.
 
 ### Basic usage with default size and factory
 
@@ -123,6 +124,27 @@ for i in range(10):
     print(sequence, value)
 
 proc.join()
+```
+
+### Single Producer Disruptor (Multiple Subscribers)
+
+```python
+from pyring import SingleProducerDisruptor
+
+disruptor = SingleProducerDisruptor()
+
+subscriber_one = disruptor.subscribe()
+subscriber_two = disruptor.subscribe()
+
+for i in range(100):
+    disruptor.put(i ** 2)
+    sequence_one, res_one = subscriber_one.next()
+    sequence_two, res_two = subscriber_two.next()
+
+# releases the subscribers barriers and allows disruptor to continue
+subscriber_one.unregister()
+subscriber_two.unregister()
+
 ```
 
 ## Examples of Usage
