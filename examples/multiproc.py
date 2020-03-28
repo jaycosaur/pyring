@@ -9,7 +9,7 @@ def worker(ring_buffer: pyring.RingBuffer):
 
 class EventFactory(pyring.RingFactory):
     def __init__(self):
-        self.value = multiprocessing.Value("d")
+        self.value = multiprocessing.Value("i")
         self.lock = multiprocessing.Lock()
 
     def get(self):

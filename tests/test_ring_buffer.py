@@ -82,18 +82,12 @@ def construct_test_case(ring_class: RingBuffer):
 
         def test_flush(self):
             ring_buffer = self.ring_buffer()
-            print("here1")
             for i in range(100):
                 ring_buffer.put(i)
 
-            print("here2")
-
             self.assertEqual(ring_buffer.get_latest(), (99, 99))
 
-            print("here3")
             ring_buffer.flush()
-
-            print("here4")
 
             with self.assertRaises(Empty):
                 ring_buffer.get_latest()
