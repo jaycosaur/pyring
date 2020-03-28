@@ -20,7 +20,7 @@ class CustomSumFactory(RingFactory):
         self.value = values
 
 
-def construct_test_case(ring_class: RingBuffer):
+def construct_test_case(ring_class: typing.Type[RingBuffer]):
     class GenericTestRingBuffer(unittest.TestCase):
         def setUp(self):
             self.ring_buffer = ring_class
@@ -95,11 +95,17 @@ def construct_test_case(ring_class: RingBuffer):
     return GenericTestRingBuffer
 
 
-class TestRingBuffer(construct_test_case(RingBuffer)):
+ring_buffer_test = construct_test_case(RingBuffer)  # type: typing.Any
+
+
+class TestRingBuffer(ring_buffer_test):
     pass
 
 
-class TestLockedRingBuffer(construct_test_case(LockedRingBuffer)):
+locked_ring_buffer_test = construct_test_case(RingBuffer)  # type: typing.Any
+
+
+class TestLockedRingBuffer(locked_ring_buffer_test):
     pass
 
 

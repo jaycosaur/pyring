@@ -8,7 +8,7 @@ from pyring import (
 )
 
 
-def construct_test_case(ring_buffer: BlockingRingBuffer):
+def construct_test_case(ring_buffer: typing.Type[BlockingRingBuffer]):
     class TestBlockingRingBuffer(unittest.TestCase):
         def setUp(self):
             self.ring_buffer = ring_buffer
@@ -60,11 +60,19 @@ def construct_test_case(ring_buffer: BlockingRingBuffer):
     return TestBlockingRingBuffer
 
 
-class TestBlockingRingBuffer(construct_test_case(BlockingRingBuffer)):
+blocking_ring_buffer = construct_test_case(BlockingRingBuffer)  # type: typing.Any
+
+
+class TestBlockingRingBuffer(blocking_ring_buffer):
     pass
 
 
-class TestBlockingLockedRingBuffer(construct_test_case(BlockingLockedRingBuffer)):
+blocking_locked_ring_buffer = construct_test_case(
+    BlockingLockedRingBuffer
+)  # type: typing.Any
+
+
+class TestBlockingLockedRingBuffer(blocking_locked_ring_buffer):
     pass
 
 
