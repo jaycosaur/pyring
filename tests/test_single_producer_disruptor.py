@@ -90,9 +90,10 @@ class TestSingleProducerDisruptor(unittest.TestCase):
             self.assertEqual(res, i ** 2)
             self.assertEqual(sequence, i)
 
-
     def test_slow_multi_consumer(self):
-        disruptor = SingleProducerDisruptor(size=4) # this test doesn't pass when size = 2
+        disruptor = SingleProducerDisruptor(
+            size=4
+        )  # this test doesn't pass when size = 2
 
         number_of_subs = 4
 
@@ -105,17 +106,20 @@ class TestSingleProducerDisruptor(unittest.TestCase):
         final_val = None
 
         def worker(idx: int, subscriber: DisruptorSubscriber):
-            delay = random.random()/100
+            delay = random.random() / 100
             final_value = None
             for _ in range(4):
                 time.sleep(delay)
                 _, val = subscriber.next(timeout=0.25)
                 final_value = val
-            
+
             nonlocal final_values
             final_values[idx] = final_value
 
-        threads = [threading.Thread(target=worker, args=(idx, subscriber)) for idx, subscriber in enumerate(subscribers)]
+        threads = [
+            threading.Thread(target=worker, args=(idx, subscriber))
+            for idx, subscriber in enumerate(subscribers)
+        ]
 
         for thread in threads:
             thread.start()
@@ -127,8 +131,7 @@ class TestSingleProducerDisruptor(unittest.TestCase):
             thread.join()
 
         for idx, thread in enumerate(threads):
-             self.assertEqual(final_values[idx], 3)
-       
+            self.assertEqual(final_values[idx], 3)
 
     def test_slow_producer(self):
         disruptor = SingleProducerDisruptor(size=2)

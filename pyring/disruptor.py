@@ -12,7 +12,7 @@ class DisruptorMethods(ABC):
         ...
 
     @abstractmethod
-    def subscribe(self, start_at_latest: bool) -> 'DisruptorSubscriber':
+    def subscribe(self, start_at_latest: bool) -> "DisruptorSubscriber":
         ...
 
 
@@ -62,7 +62,9 @@ class SingleProducerDisruptor(RingBufferInternal, DisruptorMethods):
 
     def subscribe(self, start_at_latest: bool = False) -> DisruptorSubscriber:
         if start_at_latest:
-            subscriber = DisruptorSubscriber(ring_buffer=self, read_cursor=self._get_latest()[0])
+            subscriber = DisruptorSubscriber(
+                ring_buffer=self, read_cursor=self._get_latest()[0]
+            )
         else:
             subscriber = DisruptorSubscriber(ring_buffer=self,)
         self._subscribers.append(subscriber)
