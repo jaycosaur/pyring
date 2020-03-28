@@ -54,7 +54,7 @@ class TestSingleProducerDisruptor(unittest.TestCase):
 
     def test_single_sub_cannot_write_over_read_cursor(self):
         disruptor = SingleProducerDisruptor(size=4)
-        subsriber = disruptor.subscribe()
+        _subsriber = disruptor.subscribe()
 
         for i in range(4):
             disruptor.put(i)
@@ -73,7 +73,7 @@ class TestSingleProducerDisruptor(unittest.TestCase):
     def test_unregister_single_sub_doesnt_unblock_producer(self):
         disruptor = SingleProducerDisruptor(size=4)
         subscriber = disruptor.subscribe()
-        subscriber_block = disruptor.subscribe()
+        _subscriber_block = disruptor.subscribe()
 
         subscriber.unregister()
 
@@ -102,8 +102,6 @@ class TestSingleProducerDisruptor(unittest.TestCase):
         self.assertEqual(len(disruptor._subscribers), number_of_subs)
 
         final_values = [None for _ in range(number_of_subs)]
-
-        final_val = None
 
         def worker(idx: int, subscriber: DisruptorSubscriber):
             delay = random.random() / 100
