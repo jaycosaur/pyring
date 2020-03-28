@@ -1,4 +1,4 @@
-import setuptools  # type: ignore
+import setuptools
 
 setuptools.setup(
     name="pyring",
