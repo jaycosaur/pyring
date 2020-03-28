@@ -232,7 +232,7 @@ class WaitingBlockingRingBuffer(RingBufferInternal, SequencedRingBufferMethods):
             size=size, factory=factory, cursor_position_value=cursor_position_value
         )
 
-    def put(self, value, timeout: int = None):
+    def put(self, value, timeout: float = None):
         if not self._read_cursor_barrier.is_set():
             self._read_cursor_barrier.set()
         if (self._get_cursor_position() - self._read_cursor) == self.ring_size:
@@ -242,7 +242,7 @@ class WaitingBlockingRingBuffer(RingBufferInternal, SequencedRingBufferMethods):
                 raise ReadCursorBlock()
         return super()._put(value)
 
-    def next(self, timeout: int = None):
+    def next(self, timeout: float = None):
         try:
             res = super()._get(self._read_cursor)
         except SequenceNotFound:
