@@ -15,4 +15,4 @@ from .ring_buffer import (
 from .disruptor import SingleProducerDisruptor, DisruptorSubscriber
 from .exceptions import SequenceNotFound, Empty, SequenceOverwritten, ReadCursorBlock
 
-__version__ = "0.0.8"
+__version__ = "0.0.10"
