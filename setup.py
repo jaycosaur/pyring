@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="pyring",
-    version="0.0.10",
+    version="0.0.11",
     author="Jacob Richter",
     author_email="jaycorichter@gmail.com",
     description="A ring buffer implemented in pure python.",
